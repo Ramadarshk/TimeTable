@@ -1,4 +1,4 @@
-package com.example.timetable
+package com.example.timetable.viewmodels
 
 
 import androidx.compose.runtime.mutableStateListOf
@@ -19,11 +19,9 @@ class AddSlot:ViewModel() {
         return max
     }
 
-    fun convertDC(slotInfo: DataOfSlot): DataOfSlot {
-        return DataOfSlot(courseId = slotInfo.courseId, courseName = slotInfo.courseName, theory = slotInfo.theory, theoryLocation = slotInfo.theoryLocation, lab = slotInfo.lab, labLocation = slotInfo.labLocation, isLab = slotInfo.isLab)
-    }
 
-    private fun cleanUp() {
+
+    fun cleanUp() {
         headText.value=""
         courseCode.value=""
         theoryLocation.value=""

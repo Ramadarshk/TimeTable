@@ -1,4 +1,4 @@
-package com.example.timetable
+package com.example.timetable.dataclass
 
 data class DataSlot(
     val title: String ,

@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +28,8 @@ import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -44,9 +48,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -58,7 +64,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.timetable.database.DataOfSlot
 import com.example.timetable.database.RoomDB
+import com.example.timetable.protodatastore.Preferences
 import com.example.timetable.ui.theme.TimeTableTheme
+import com.example.timetable.viewmodels.AddSlot
+import com.example.timetable.viewmodels.StableView
 import kotlinx.coroutines.launch
 
 class MainActivity2 : ComponentActivity() {
@@ -72,7 +81,87 @@ class MainActivity2 : ComponentActivity() {
             }
         }
     }
-    @Preview(showBackground = true)
+
+
+    @Composable
+    fun SelectedTable( view: StableView = viewModel()) {
+        var show by remember { mutableStateOf(false) }
+        val scope = rememberCoroutineScope()
+        val dataStore1 = dataStore.data.collectAsState(initial = Preferences())
+        view.getDataOf.value=dataStore1.value.sem
+        Box(
+            Modifier
+                .padding(start = 10.dp , end = 10.dp)
+                .border(1.dp , MaterialTheme.colorScheme.onBackground , RoundedCornerShape(20.dp))) {
+            val showDown: () -> Unit = {
+                show = !show
+                scope.launch {
+                    view.getData()
+                }
+            }
+            Column(Modifier/*.padding( start = 10.dp , end = 10.dp)*/) {
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .border(
+                            1.dp ,
+                            MaterialTheme.colorScheme.onBackground ,
+                            RoundedCornerShape(20.dp)
+                        ),
+                    horizontalArrangement = Arrangement.SpaceBetween ,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(onClick = showDown,
+                        modifier = Modifier.weight(8.5f)) {
+                        Text(
+                            text = when(view.getDataOf.value){
+                                "Please Select a Day By Pressing ->"->view.getDataOf.value
+                                else ->"${view.getDataOf.value} SEM"
+                            }  ,
+                            textAlign = TextAlign.Center,
+                            fontSize = 19.sp
+                        )
+                    }
+                    IconButton(onClick = showDown , Modifier.weight(1.5f)) {
+                        Icon(
+                            imageVector = if (show) {
+                                Icons.Default.KeyboardArrowUp
+                            } else {
+                                Icons.Default.KeyboardArrowDown
+                            } , contentDescription = null
+                        )
+                    }
+                }
+                AnimatedVisibility(visible = show) {
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .height(100.dp)
+                    ) {
+                        Column(
+                            Modifier.fillMaxWidth() ,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            view.data.forEach { sem ->
+                                TextButton(onClick = {
+                                    view.getDataOf.value = sem
+                                    scope.launch {
+                                        dataStore.updateData {
+                                            it.copy(sem = sem)
+                                        }
+                                    }
+                                    show = false
+                                }) {
+                                    Text(text = sem , fontWeight = FontWeight.ExtraBold,color = MaterialTheme.colorScheme.onBackground)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     @Composable
     fun SlotScreen(slotInfo: DataOfSlot=DataOfSlot("","", listOf("","","",""),"",listOf("","","",""),"",true),onEdit:()->Unit={}) {
         // Box(modifier = modifier.fillMaxSize()){
@@ -89,7 +178,7 @@ class MainActivity2 : ComponentActivity() {
                 Modifier
                     .align(Alignment.TopEnd)
                     .padding(end = 10.dp)) {
-                Icon(imageVector = Icons.Default.Edit , contentDescription = null)
+                Icon(imageVector = Icons.Default.Edit , contentDescription = null,tint=  MaterialTheme.colorScheme.onPrimaryContainer)
             }
 
             Column(
@@ -101,12 +190,14 @@ class MainActivity2 : ComponentActivity() {
                     Text(
                         text = slotInfo.courseName ,
                         modifier = Modifier.weight(1f) ,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
                         text = slotInfo.courseId ,
                         modifier = Modifier.weight(1f) ,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Spacer(Modifier.weight(.39f))
                 }
@@ -166,18 +257,18 @@ class MainActivity2 : ComponentActivity() {
     }
 
 
-    @Preview(showBackground = true)
     @Composable
     fun Dialog(
-        viewModel: AddSlot = viewModel(),
+        viewModel: AddSlot = viewModel() ,
         dataOfSlot:DataOfSlot?=null ,
         onSave: () -> Unit = {} ,
-        onDelete: () -> Unit = {},
-        onEdit:Boolean=false,
+        onDelete: () -> Unit = {} ,
+        onEdit:Boolean=false ,
         onDismiss: () -> Unit = {}
     ) {
 
         AlertDialog(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
             modifier = Modifier.fillMaxWidth() ,
             onDismissRequest = onDismiss ,
             confirmButton = {
@@ -193,12 +284,13 @@ class MainActivity2 : ComponentActivity() {
             title = {
                 Box(modifier = Modifier.fillMaxWidth()) {
                 Text(text = "Add Slot")
-                IconButton(onClick = if(onEdit)onDelete else onDismiss,
+                    if(onEdit){
+                IconButton(onClick = onDelete ,
                     Modifier
                         .align(Alignment.TopEnd)
                         .padding(end = 10.dp)) {
-                    Icon(imageVector = Icons.Default.Delete , contentDescription = null)
-                }} },
+                    Icon(imageVector = Icons.Default.Delete , contentDescription = null,tint=  MaterialTheme.colorScheme.onPrimaryContainer)
+                }} }},
             text = {
 
                 var headText by viewModel.headText
@@ -258,80 +350,7 @@ class MainActivity2 : ComponentActivity() {
 
     }
 
-/*    @Composable
-    fun DialogEdit(
-        viewModel: AddSlot = viewModel(),
-        dataOfSlot:DataOfSlot?=null ,
-        onSave: () -> Unit = {} ,
-        onDismiss: () -> Unit = {}
-    ) {
 
-        AlertDialog(
-            modifier = Modifier.fillMaxWidth() ,
-            onDismissRequest = onDismiss ,
-            confirmButton = {
-                TextButton(onClick = onSave) {
-                    Text(text = "OK")
-                }
-            } ,
-            dismissButton = {
-                TextButton(onClick = onDismiss) {
-                    Text(text = "Cancel")
-                }
-            } ,
-            title = { Text(text = "Add Slot") } ,
-            text = {
-                var headText by viewModel.headText
-                var courseCode by viewModel.courseCode
-                var theoryLocation by viewModel.theoryLocation
-                var labLocation by viewModel.labLocation
-                var isLab by viewModel.isLab
-                val keyOption = KeyboardOptions(
-                    KeyboardCapitalization.Characters ,
-                    imeAction = ImeAction.Next ,
-                    keyboardType = KeyboardType.Text
-                )
-                Box(modifier = Modifier , contentAlignment = Alignment.TopCenter) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        OutlinedTextField(value = headText , onValueChange = {
-                            headText = it.uppercase()
-                        } , label = { Text(text = "Course Name") } , keyboardOptions = keyOption)
-                        OutlinedTextField(value = courseCode , onValueChange = {
-                            courseCode = it.uppercase()
-                        } , label = { Text(text = "Course Code") } , keyboardOptions = keyOption)
-                        Spacer(Modifier.height(10.dp))
-                        SlotSet("Theory" , 1 , viewModel , keyOption)
-                        Spacer(Modifier.height(10.dp))
-                        OutlinedTextField(
-                            value = theoryLocation ,
-                            onValueChange = {
-                                theoryLocation = it.uppercase()
-                            } ,
-                            label = { Text(text = "Theory Location") } ,
-                            keyboardOptions = keyOption
-                        )
-                        Row(
-                            Modifier
-                                .padding(horizontal = 5.dp)
-                                .fillMaxWidth() ,
-                            verticalAlignment = Alignment.CenterVertically ,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(text = "Lab")
-                            Switch(checked = isLab , onCheckedChange = { isLab = it } , Modifier)
-                        }
-                        if (isLab) {
-                            SlotSet("Lab" , 2 , viewModel , keyOption)
-                            Spacer(Modifier.height(10.dp))
-                            OutlinedTextField(value = labLocation , onValueChange = {
-                                labLocation = it.uppercase()
-                            } , label = { Text(text = "Lab Location") })
-                        }
-                    }
-                }
-            })
-
-    }*/
 
     @Composable
     fun SlotSet(
@@ -404,7 +423,6 @@ class MainActivity2 : ComponentActivity() {
 
     }
 
-    @Preview(showBackground = true)
     @Composable
     fun Top(deleteAll: () -> Unit = {} , dialogOpen: () -> Unit = {}) {
         Row(
@@ -421,12 +439,15 @@ class MainActivity2 : ComponentActivity() {
             ) {
                 Icon(Icons.Default.ArrowBackIosNew , contentDescription = null)
             }
+
             Text(
                 text = "SLOT INFO" ,
                 modifier = Modifier
                     .weight(8f)
                     .padding(start = 16.dp , top = 5.dp) ,
-                textAlign = TextAlign.Start
+                textAlign = TextAlign.Start,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 25.sp
             )
             IconButton(
                 onClick = deleteAll , modifier = Modifier
@@ -444,7 +465,6 @@ class MainActivity2 : ComponentActivity() {
             }
         }
     }
-    @Preview(showBackground = true)
     @Composable
 fun ShowDialog(onDismiss: () -> Unit = {},text:String="",onAccept: () -> Unit = {}){
     AlertDialog(onDismissRequest = onDismiss , confirmButton = {
@@ -457,8 +477,6 @@ fun ShowDialog(onDismiss: () -> Unit = {},text:String="",onAccept: () -> Unit = 
         }
     }, title = { Text(text = "Please Ensure")  }, text = { Text(text =text ) })
 }
-
-
     @Composable
     fun MyScreen() {
         val viewModel: AddSlot = viewModel()
@@ -468,7 +486,6 @@ fun ShowDialog(onDismiss: () -> Unit = {},text:String="",onAccept: () -> Unit = 
         var updateOpen by remember { mutableStateOf(false) }
         var alert by remember { mutableStateOf(false) }
         var textOnAlert by remember { mutableStateOf("") }
-        var onEditing by remember { mutableStateOf(false) }
         val InitialState:DataOfSlot by remember {
             mutableStateOf(DataOfSlot("","", listOf("","","",""),"",listOf("","","",""),"",false))
         }
@@ -480,9 +497,13 @@ fun ShowDialog(onDismiss: () -> Unit = {},text:String="",onAccept: () -> Unit = 
                 alert = true
                 textOnAlert = "Are you sure you want to delete all data?"
             }
-            )
+            ){
+                dialogOpen = true
+            }
         }) { innerPadding ->
             Box(Modifier.padding(innerPadding)) {
+                Column(){
+                    SelectedTable()
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(list) {
                         SlotScreen(it) {
@@ -492,6 +513,7 @@ fun ShowDialog(onDismiss: () -> Unit = {},text:String="",onAccept: () -> Unit = 
 
                         }
                     }
+                }
                 }
             }
             if (dialogOpen) {
@@ -517,8 +539,10 @@ fun ShowDialog(onDismiss: () -> Unit = {},text:String="",onAccept: () -> Unit = 
                     updateOpen=false
                     textOnAlert = "Are you sure you want to delete the slot?"
                     alert=true
+                    viewModel.cleanUp()
                 }) {
                     currentSelected=InitialState
+                    viewModel.cleanUp()
                     updateOpen= false
                 }
             }

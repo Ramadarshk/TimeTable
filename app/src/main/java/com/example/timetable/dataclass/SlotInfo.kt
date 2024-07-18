@@ -1,4 +1,4 @@
-package com.example.timetable.old
+package com.example.timetable.dataclass
 
 data class SlotInfo(
     val courseId: String ,

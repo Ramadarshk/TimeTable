@@ -1,5 +1,6 @@
 package com.example.timetable
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -7,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,7 +30,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material.icons.filled.InsertEmoticon
 import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.ButtonDefaults
@@ -43,9 +44,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -53,11 +52,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.datastore.dataStore
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.timetable.database.RoomDB
+import com.example.timetable.dataclass.DataSlot
 import com.example.timetable.old.ConvertTheDataOfSlot
+import com.example.timetable.old.back
+import com.example.timetable.protodatastore.Preferences
+import com.example.timetable.protodatastore.PreferencesSerialization
 import com.example.timetable.ui.theme.TimeTableTheme
-import java.util.Locale
+import com.example.timetable.viewmodels.StableView
+import kotlinx.coroutines.launch
+
+val Context.dataStore by dataStore("preferences.Json", PreferencesSerialization)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,11 +79,11 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun getDataDay(day: String , isAmPm:Boolean ): List<DataSlot> {
+        val view: StableView = viewModel()
         val data = RoomDB.getDataBase(applicationContext)
         val slots by data.slotDao().getAll().collectAsState(initial = emptyList())
         val listOfSlot: MutableList<DataSlot> = mutableListOf()
-        val obj= ConvertTheDataOfSlot()
-       // val slots=listOf(DataOfSlot ("CSE1002","Crypto",listOf("TD2","D2","",""),"CB101",listOf("L37","L38","L2","L3"),"CB202",true))
+        val obj= ConvertTheDataOfSlot(view.findTable())
         val all=obj.dataOfSlotConverter(slots)
         val slotInDay = obj.myListMapsToTime(all,obj.listOfSlotInDay(day = day,1)+obj.listOfSlotInDay(day = day,0),8,20)
         val timeZone= IntRange(8,20).toList()
@@ -99,7 +106,7 @@ class MainActivity : ComponentActivity() {
                 }else{
                     obj.time(it,slotInDay[it]!!,false)
                 }
-                listOfSlot +=DataSlot(slot.courseName,
+                listOfSlot += DataSlot(slot.courseName,
                     time ,slotLocation,slot.courseId,isLabSlot)
             }
         }
@@ -136,24 +143,34 @@ private fun getData(day: String,timeAmPm:Boolean=true): List<DataSlot> {
 @Preview(showBackground = true)
 @Composable
 fun OnScreen(viewModel: StableView = viewModel()) {
-    Scaffold(modifier = Modifier
+    Scaffold(modifier = Modifier.background(MaterialTheme.colorScheme.background)
         .padding(top = 40.dp , bottom = 40.dp)
         .fillMaxSize() , topBar = {
-        DateRow(viewModel = viewModel){
-            viewModel.timeAmPm.value=!viewModel.timeAmPm.value
+            val scope = rememberCoroutineScope()
+        val dataStore1 = dataStore.data.collectAsState(initial = Preferences())
+        viewModel.getDataOf.value=dataStore1.value.sem
+        viewModel.timeAmPm.value=dataStore1.value.timeAmPm
+        DateRow(viewModel = viewModel) {
+            viewModel.timeAmPm.value = !viewModel.timeAmPm.value
+            scope.launch {
+                dataStore.updateData {
+                    it.copy(timeAmPm = viewModel.timeAmPm.value)
+                }
+            }
         }
     }) { innerPadding ->
-        Box(Modifier.padding(innerPadding)) {
-           val dataList = getDataDay(viewModel.day.value,viewModel.timeAmPm.value)
+        val day=viewModel.day.value
+        Box(Modifier.padding(innerPadding).background(MaterialTheme.colorScheme.background)) {
+           val dataList = getDataDay(day,viewModel.timeAmPm.value)
             //val dataList = getData(viewModel.day.value,viewModel.timeAmPm.value)
             Log.d("data" , dataList.toString())
             if (dataList.isEmpty()) {
                 val data0 = DataSlot(
-                    "NO CLASSES ON THIS ${viewModel.day.value.uppercase()}" ,
-                    "" ,
-                    "" ,
-                    viewModel.day.value + 0 ,
-                    false
+                    title = "NO CLASSES ON THIS ${viewModel.day.value.uppercase()}" ,
+                    timeTitle = "" ,
+                    locationTitle = "" ,
+                    slotId = viewModel.day.value + 0 ,
+                    lab = false
                 )
                 DailySlotCard(data = data0 , true)
             } else {
@@ -218,7 +235,7 @@ fun DailySlotCard(data: DataSlot , sizeNil: Boolean = false) {
 
 
 @Composable
-fun DateRow(viewModel: StableView = viewModel(), onChangeTime: () -> Unit = {}) {
+fun DateRow(viewModel: StableView = viewModel() , onChangeTime: () -> Unit = {}) {
    // var timer by remember { mutableStateOf(true) }
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Row(modifier = Modifier
@@ -228,11 +245,11 @@ fun DateRow(viewModel: StableView = viewModel(), onChangeTime: () -> Unit = {}) 
                 text = viewModel.day.value.uppercase() ,
                 color = MaterialTheme.colorScheme.primary ,
                 fontWeight = FontWeight.ExtraBold ,
-                fontSize = 30.sp,
+                fontSize = 25.sp,
                 modifier = Modifier.weight(1f)
             )
             TextButton(onClick = { Intent(this@MainActivity , MainActivity2::class.java).also { startActivity(it)} }) {
-                Text(text = "SLOTS VIEW", color = MaterialTheme.colorScheme.primary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(text = "${viewModel.getDataOf.value} SEM VIEW" , color = MaterialTheme.colorScheme.primary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
             IconButton(onClick = onChangeTime) {
                 if(viewModel.timeAmPm.value){
