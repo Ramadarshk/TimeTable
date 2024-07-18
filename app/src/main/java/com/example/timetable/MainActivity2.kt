@@ -52,6 +52,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -114,7 +115,7 @@ class MainActivity2 : ComponentActivity() {
                         modifier = Modifier.weight(8.5f)) {
                         Text(
                             text = when(view.getDataOf.value){
-                                "Please Select a Day By Pressing ->"->view.getDataOf.value
+                                stringResource(R.string.please_select_a_day_by_pressing) ->view.getDataOf.value
                                 else ->"${view.getDataOf.value} SEM"
                             }  ,
                             textAlign = TextAlign.Center,
@@ -492,11 +493,15 @@ fun ShowDialog(onDismiss: () -> Unit = {},text:String="",onAccept: () -> Unit = 
         }
         Scaffold(modifier = Modifier.fillMaxSize() , topBar = {
             Top(deleteAll = {
+                if(list.isNotEmpty()){
                 alert = true
+                }
                 textOnAlert = "Are you sure you want to delete all data?"
             }
             ){
+
                 dialogOpen = true
+
             }
         }) { innerPadding ->
             Box(Modifier.padding(innerPadding)) {

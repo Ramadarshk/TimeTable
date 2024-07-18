@@ -47,6 +47,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -115,7 +116,8 @@ class MainActivity : ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 fun OnScreen(viewModel: StableView = viewModel()) {
-    Scaffold(modifier = Modifier.background(MaterialTheme.colorScheme.background)
+    Scaffold(modifier = Modifier
+        .background(MaterialTheme.colorScheme.background)
         .padding(top = 40.dp , bottom = 40.dp)
         .fillMaxSize() , topBar = {
             val scope = rememberCoroutineScope()
@@ -132,7 +134,10 @@ fun OnScreen(viewModel: StableView = viewModel()) {
         }
     }) { innerPadding ->
         val day=viewModel.day.value
-        Box(Modifier.padding(innerPadding).background(MaterialTheme.colorScheme.background)) {
+        Box(
+            Modifier
+                .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.background)) {
            val dataList = getDataDay(day,viewModel.timeAmPm.value)
             //val dataList = getData(viewModel.day.value,viewModel.timeAmPm.value)
             Log.d("data" , dataList.toString())
@@ -212,7 +217,7 @@ fun DateRow(viewModel: StableView = viewModel() , onChangeTime: () -> Unit = {})
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Row(modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 25.dp, end = 15.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            .padding(start = 25.dp , end = 15.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = viewModel.day.value.uppercase() ,
                 color = MaterialTheme.colorScheme.primary ,
@@ -221,7 +226,9 @@ fun DateRow(viewModel: StableView = viewModel() , onChangeTime: () -> Unit = {})
                 modifier = Modifier.weight(1f)
             )
             TextButton(onClick = { Intent(this@MainActivity , MainActivity2::class.java).also { startActivity(it)} }) {
-                Text(text = "${viewModel.getDataOf.value} SEM VIEW" , color = MaterialTheme.colorScheme.primary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(text = when(viewModel.getDataOf.value){
+                    stringResource(R.string.please_select_a_day_by_pressing) ->"SLOT VIEW"
+                    else->"${viewModel.getDataOf.value} SEM VIEW" }, color = MaterialTheme.colorScheme.primary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
             IconButton(onClick = onChangeTime) {
                 if(viewModel.timeAmPm.value){
