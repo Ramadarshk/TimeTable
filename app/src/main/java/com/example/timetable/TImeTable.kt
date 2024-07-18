@@ -1,7 +1,6 @@
 package com.example.timetable
 
 import android.app.Application
-import com.example.timetable.database.RoomDB
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.database.database

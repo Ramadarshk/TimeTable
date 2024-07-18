@@ -57,7 +57,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.timetable.database.RoomDB
 import com.example.timetable.dataclass.DataSlot
 import com.example.timetable.old.ConvertTheDataOfSlot
-import com.example.timetable.old.back
 import com.example.timetable.protodatastore.Preferences
 import com.example.timetable.protodatastore.PreferencesSerialization
 import com.example.timetable.ui.theme.TimeTableTheme
@@ -112,34 +111,7 @@ class MainActivity : ComponentActivity() {
         }
         return listOfSlot.toList()
     }
-private fun getData(day: String,timeAmPm:Boolean=true): List<DataSlot> {
-    val dataList: ArrayList<DataSlot> = arrayListOf()
-    val obj = back()
-    val hash = obj.hashl()
-    val k = obj.myt(hash , obj.ttsen(day , 0) + obj.ttsen(day , 1))
 
-
-    val n1 = arrayListOf(8 , 9 , 10 , 11 , 12 , 2 , 3 , 4 , 5 , 6 , 7)
-    for (n in n1) {
-        if (k.containsKey(n)) {
-            val dataclass = hash[k[n]]?.let {
-                obj.Location(it , k[n])?.let { it1 ->
-                    DataSlot(
-                        title = it ,
-                        timeTitle = obj.time(n , k[n]!!,timeAmPm) ,
-                        locationTitle = it1 ,
-                        slotId = day + n ,
-                        lab = obj.labCheck(k[n]!!)
-                    )
-                }
-            }
-            if (dataclass != null) {
-                dataList.add(dataclass)
-            }
-        }
-    }
-    return dataList
-}
 @Preview(showBackground = true)
 @Composable
 fun OnScreen(viewModel: StableView = viewModel()) {

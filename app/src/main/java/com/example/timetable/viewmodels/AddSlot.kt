@@ -26,13 +26,13 @@ class AddSlot:ViewModel() {
         courseCode.value=""
         theoryLocation.value=""
         labLocation.value=""
-        theorySlot =  mutableStateListOf<String>("","","","")
-        labSlot =  mutableStateListOf<String>("","","","")
+        theorySlot =  mutableStateListOf("","","","")
+        labSlot =  mutableStateListOf("","","","")
         isLab.value=false
     }
 
-    fun mix(theory: List<String?> ): SnapshotStateList<String> {
-        val mix = mutableStateListOf<String>("","","","")
+    private fun mix(theory: List<String?> ): SnapshotStateList<String> {
+        val mix = mutableStateListOf("","","","")
         for (i in 0..3){
             mix[i]= theory[i].toString()
         }
@@ -51,12 +51,11 @@ class AddSlot:ViewModel() {
         }
     }
 
-    val slotInfos = mutableStateOf<List<DataOfSlot>>(emptyList())
     var headText = mutableStateOf("")
     var courseCode = mutableStateOf("")
     var theoryLocation = mutableStateOf("")
     var labLocation= mutableStateOf("")
-    var theorySlot =  mutableStateListOf<String>("","","","")
-    var labSlot = mutableStateListOf<String>("","","","")
+    var theorySlot =  mutableStateListOf("","","","")
+    var labSlot = mutableStateListOf("","","","")
     var isLab = mutableStateOf(false)
 }

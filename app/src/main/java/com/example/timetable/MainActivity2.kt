@@ -75,7 +75,6 @@ class MainActivity2 : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val tt = TImeTable()
             TimeTableTheme {
                 MyScreen()
             }
@@ -247,7 +246,7 @@ class MainActivity2 : ComponentActivity() {
     }
 
     fun plus(sessionSlot: List<String?>): String {
-        var kel = emptyList<String?>()
+        val kel = emptyList<String?>().toMutableList()
         sessionSlot.filter {
             it != null && it != ""
         }.forEach {
@@ -260,7 +259,6 @@ class MainActivity2 : ComponentActivity() {
     @Composable
     fun Dialog(
         viewModel: AddSlot = viewModel() ,
-        dataOfSlot:DataOfSlot?=null ,
         onSave: () -> Unit = {} ,
         onDelete: () -> Unit = {} ,
         onEdit:Boolean=false ,
@@ -355,16 +353,16 @@ class MainActivity2 : ComponentActivity() {
     @Composable
     fun SlotSet(
         session: String ,
-        Init: Int ,
+        init: Int ,
         viewModel: AddSlot = viewModel() ,
         keyOption: KeyboardOptions ,
     ) {
-        val theorySlot = if (Init == 1) {
+        val theorySlot = if (init == 1) {
             viewModel.theorySlot
         } else  {
             viewModel.labSlot
         }
-        var itemNo by remember { mutableIntStateOf(Init) }
+        var itemNo by remember { mutableIntStateOf(init) }
         var state by remember { mutableStateOf(false) }
         Column(Modifier) {
             Row(
@@ -376,11 +374,11 @@ class MainActivity2 : ComponentActivity() {
             ) {
                 Text(text = "$session Slot" , modifier = Modifier)
                 IconButton(onClick = {
-                    itemNo = change(itemNo , Init , state)
+                    itemNo = change(itemNo , init , state)
                     if (itemNo == 4 && !state) {
                         state = true
                     }
-                    if (itemNo == Init && state) {
+                    if (itemNo == init && state) {
                         state = false
                     }
                 } , modifier = Modifier) {
@@ -395,7 +393,7 @@ class MainActivity2 : ComponentActivity() {
                 LazyRow(modifier = Modifier.weight(4f)) {
                     items(itemNo) { index ->
                         OutlinedTextField(value = theorySlot[index] ,
-                            onValueChange = { it ->
+                            onValueChange = {
                                 theorySlot[index] = it.uppercase()
                             } ,
                             label = { Text(text = "Slot ${index + 1}" , fontSize = 10.sp) } ,
@@ -412,7 +410,7 @@ class MainActivity2 : ComponentActivity() {
         }
     }
 
-    fun change(itemNo: Int , init: Int , state: Boolean): Int {
+    private fun change(itemNo: Int , init: Int , state: Boolean): Int {
         var itemNo1 = itemNo
         if (itemNo < 4 && !state) {
             itemNo1 += init
@@ -486,7 +484,7 @@ fun ShowDialog(onDismiss: () -> Unit = {},text:String="",onAccept: () -> Unit = 
         var updateOpen by remember { mutableStateOf(false) }
         var alert by remember { mutableStateOf(false) }
         var textOnAlert by remember { mutableStateOf("") }
-        val InitialState:DataOfSlot by remember {
+        val initialState:DataOfSlot by remember {
             mutableStateOf(DataOfSlot("","", listOf("","","",""),"",listOf("","","",""),"",false))
         }
         var currentSelected:DataOfSlot by remember {
@@ -502,7 +500,7 @@ fun ShowDialog(onDismiss: () -> Unit = {},text:String="",onAccept: () -> Unit = 
             }
         }) { innerPadding ->
             Box(Modifier.padding(innerPadding)) {
-                Column(){
+                Column{
                     SelectedTable()
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(list) {
@@ -535,13 +533,13 @@ fun ShowDialog(onDismiss: () -> Unit = {},text:String="",onAccept: () -> Unit = 
                         data.slotDao().delete(currentSelected)
                         data.slotDao().insert(k)
                     }
-                },dataOfSlot = currentSelected, onEdit = true, onDelete = {
+                }, onEdit = true, onDelete = {
                     updateOpen=false
                     textOnAlert = "Are you sure you want to delete the slot?"
                     alert=true
                     viewModel.cleanUp()
                 }) {
-                    currentSelected=InitialState
+                    currentSelected=initialState
                     viewModel.cleanUp()
                     updateOpen= false
                 }
@@ -551,7 +549,7 @@ fun ShowDialog(onDismiss: () -> Unit = {},text:String="",onAccept: () -> Unit = 
                 if (textOnAlert == "Are you sure you want to delete all data?") {
                     lifecycleScope.launch {
                         data.slotDao().delete(currentSelected)
-                        currentSelected=InitialState
+                        currentSelected=initialState
                     }
                 }
                  lifecycleScope.launch {
