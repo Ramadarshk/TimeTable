@@ -5,7 +5,7 @@ import com.example.timetable.dataclass.Week
 import com.example.timetable.viewmodels.StableView
 
 
-class ConvertTheDataOfSlot(semWeek: Week) {
+class ConvertTheDataOfSlot(semWeek: Week=Week()) {
     private var tut = semWeek.tuesday //arrayListOf("TEE1","A1","B1","C1","D1","","E2","A2","TBB2","C2","TDD2","","","","","","","","SE1","","G2","","","")
     private var wed = semWeek.wednesday//arrayListOf("TG1","D1","F1","E1","B1","","E2","D2","F2","B2","TCC2","","","","","","","","SC1","","","","","")
     private var thu = semWeek.thursday//arrayListOf("TF1","TC1","TD1","TA1","TFF1","","B2","F2","TD2","TA2","TG2","","","","","","","","","","","","","")
@@ -152,7 +152,7 @@ class ConvertTheDataOfSlot(semWeek: Week) {
 }
     fun main() {
         val view= StableView()
-    val obj=ConvertTheDataOfSlot(view.findTable())
+    val obj=ConvertTheDataOfSlot(/*view.findTable()*/)
     val day="wednesday"
     val slots=listOf(DataOfSlot ("CSE1002","Crypto",listOf("TD2","D2","",""),"CB101",listOf("L37","L38","L2","L3"),"CB202",true))
     val all=obj.dataOfSlotConverter(slots)

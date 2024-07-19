@@ -91,12 +91,12 @@ class MainActivity2 : ComponentActivity() {
         view.getDataOf.value=dataStore1.value.sem
         Box(
             Modifier
-                .padding(start = 10.dp , end = 10.dp)
+                .padding(top = 10.dp , start = 10.dp , end = 10.dp)
                 .border(1.dp , MaterialTheme.colorScheme.onBackground , RoundedCornerShape(20.dp))) {
             val showDown: () -> Unit = {
                 show = !show
                 scope.launch {
-                    view.getData()
+                   view.getData()
                 }
             }
             Column(Modifier/*.padding( start = 10.dp , end = 10.dp)*/) {
@@ -114,12 +114,9 @@ class MainActivity2 : ComponentActivity() {
                     TextButton(onClick = showDown,
                         modifier = Modifier.weight(8.5f)) {
                         Text(
-                            text = when(view.getDataOf.value){
-                                stringResource(R.string.please_select_a_day_by_pressing) ->view.getDataOf.value
-                                else ->"${view.getDataOf.value} SEM"
-                            }  ,
+                            text = view.getDataOf.value,
                             textAlign = TextAlign.Center,
-                            fontSize = 19.sp
+                            fontSize = 17.sp
                         )
                     }
                     IconButton(onClick = showDown , Modifier.weight(1.5f)) {
@@ -136,7 +133,6 @@ class MainActivity2 : ComponentActivity() {
                     Box(
                         Modifier
                             .fillMaxWidth()
-                            .height(100.dp)
                     ) {
                         Column(
                             Modifier.fillMaxWidth() ,
@@ -440,7 +436,7 @@ class MainActivity2 : ComponentActivity() {
             }
 
             Text(
-                text = "SLOT INFO" ,
+                text = stringResource(R.string.slot_info) ,
                 modifier = Modifier
                     .weight(8f)
                     .padding(start = 16.dp , top = 5.dp) ,
@@ -523,9 +519,10 @@ fun ShowDialog(onDismiss: () -> Unit = {},text:String="",onAccept: () -> Unit = 
                 Dialog(viewModel , onSave = {
                     dialogOpen = false
                     val k = viewModel.onSaved()
-                    lifecycleScope.launch {
+                    if (k==initialState) {
+                        lifecycleScope.launch {
                         data.slotDao().insert(k)
-                    }
+                    }}
                 }, onEdit = false) {
                     dialogOpen = false
                 }

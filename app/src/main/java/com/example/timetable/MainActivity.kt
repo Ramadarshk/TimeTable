@@ -132,6 +132,7 @@ fun OnScreen(viewModel: StableView = viewModel()) {
                 }
             }
         }
+        
     }) { innerPadding ->
         val day=viewModel.day.value
         Box(
@@ -140,7 +141,8 @@ fun OnScreen(viewModel: StableView = viewModel()) {
                 .background(MaterialTheme.colorScheme.background)) {
            val dataList = getDataDay(day,viewModel.timeAmPm.value)
             //val dataList = getData(viewModel.day.value,viewModel.timeAmPm.value)
-            Log.d("data" , dataList.toString())
+           // Log.d("data" , dataList.toString())
+            
             if (dataList.isEmpty()) {
                 val data0 = DataSlot(
                     title = "NO CLASSES ON THIS ${viewModel.day.value.uppercase()}" ,
@@ -226,9 +228,7 @@ fun DateRow(viewModel: StableView = viewModel() , onChangeTime: () -> Unit = {})
                 modifier = Modifier.weight(1f)
             )
             TextButton(onClick = { Intent(this@MainActivity , MainActivity2::class.java).also { startActivity(it)} }) {
-                Text(text = when(viewModel.getDataOf.value){
-                    stringResource(R.string.please_select_a_day_by_pressing) ->"SLOT VIEW"
-                    else->"${viewModel.getDataOf.value} SEM VIEW" }, color = MaterialTheme.colorScheme.primary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(text = viewModel.getDataOf.value, color = MaterialTheme.colorScheme.primary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
             IconButton(onClick = onChangeTime) {
                 if(viewModel.timeAmPm.value){
@@ -248,6 +248,7 @@ fun DateRow(viewModel: StableView = viewModel() , onChangeTime: () -> Unit = {})
                 //Text(text = it, modifier = Modifier.padding(16.dp))
             }
         }
+        Spacer(modifier = Modifier.height(15.dp))
     }
 }
 

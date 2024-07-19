@@ -3,4 +3,5 @@
     <string name="title_activity_main2">MainActivity2</string>
     <string name="title_activity_main3">MainActivity3</string>
     <string name="please_select_a_day_by_pressing"><![CDATA[Please Select a Day By Pressing ->]]></string>
+    <string name="slot_info">SLOT INFO</string>
 </resources>
