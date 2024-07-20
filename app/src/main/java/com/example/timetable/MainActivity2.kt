@@ -82,7 +82,6 @@ class MainActivity2 : ComponentActivity() {
         }
     }
 
-
     @Composable
     fun SelectedTable( view: StableView = viewModel()) {
         var show by remember { mutableStateOf(false) }
@@ -97,6 +96,10 @@ class MainActivity2 : ComponentActivity() {
                 show = !show
                 scope.launch {
                    view.getData()
+                    val week=view.findTable()
+                    dataStore.updateData {
+                        it.copy(sem = view.getDataOf.value, week =week )
+                    }
                 }
             }
             Column(Modifier/*.padding( start = 10.dp , end = 10.dp)*/) {
@@ -147,7 +150,7 @@ class MainActivity2 : ComponentActivity() {
                                         }
                                     }
                                     show = false
-                                }) {
+                                }, modifier = Modifier.fillMaxWidth()) {
                                     Text(text = sem , fontWeight = FontWeight.ExtraBold,color = MaterialTheme.colorScheme.onBackground)
                                 }
                             }
@@ -216,7 +219,6 @@ class MainActivity2 : ComponentActivity() {
         //}
     }
 
-
     @Composable
     fun SessionDetails(sessionType: String , sessionSlot: List<String?> , sessionLocation: String) {
 
@@ -251,7 +253,6 @@ class MainActivity2 : ComponentActivity() {
         }
         return kel.joinToString(separator = "+")
     }
-
 
     @Composable
     fun Dialog(
@@ -345,8 +346,6 @@ class MainActivity2 : ComponentActivity() {
 
     }
 
-
-
     @Composable
     fun SlotSet(
         session: String ,
@@ -427,7 +426,9 @@ class MainActivity2 : ComponentActivity() {
                 .fillMaxWidth()
                 .padding(top = 20.dp)
         ) { IconButton(
-                onClick = { Intent(this@MainActivity2 , MainActivity::class.java).also { startActivity(it) } },
+                onClick = { val int=Intent(this@MainActivity2 , MainActivity::class.java)
+                          int.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                          startActivity(int)},
             modifier = Modifier
                 .weight(2f)
                 .padding(end = 6.dp)
@@ -460,8 +461,9 @@ class MainActivity2 : ComponentActivity() {
             }
         }
     }
+
     @Composable
-fun ShowDialog(onDismiss: () -> Unit = {},text:String="",onAccept: () -> Unit = {}){
+    fun ShowDialog(onDismiss: () -> Unit = {},text:String="",onAccept: () -> Unit = {}){
     AlertDialog(onDismissRequest = onDismiss , confirmButton = {
         TextButton(onClick = onAccept) {
             Text(text = "OK")
@@ -472,6 +474,7 @@ fun ShowDialog(onDismiss: () -> Unit = {},text:String="",onAccept: () -> Unit = 
         }
     }, title = { Text(text = "Please Ensure")  }, text = { Text(text =text ) })
 }
+
     @Composable
     fun MyScreen() {
         val viewModel: AddSlot = viewModel()
@@ -519,7 +522,7 @@ fun ShowDialog(onDismiss: () -> Unit = {},text:String="",onAccept: () -> Unit = 
                 Dialog(viewModel , onSave = {
                     dialogOpen = false
                     val k = viewModel.onSaved()
-                    if (k==initialState) {
+                    if (k!=initialState) {
                         lifecycleScope.launch {
                         data.slotDao().insert(k)
                     }}

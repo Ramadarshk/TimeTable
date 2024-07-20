@@ -3,15 +3,29 @@ package com.example.timetable.viewmodels
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.timetable.dataclass.Week
 import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 class StableView:ViewModel() {
+    private val splashShowFlow = MutableStateFlow(true)
+    val isSplashShow = splashShowFlow.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            delay(3000)
+            splashShowFlow.value = false
+        }
+    }
     private val _days=listOf("monday","tuesday","wednesday","thursday","friday","saturday","sunday")
     private val calendar: Calendar = Calendar.getInstance()
     private var dayno = calendar.get(Calendar.DAY_OF_WEEK) - 2
@@ -43,7 +57,6 @@ class StableView:ViewModel() {
         })
     }
     fun findTable():Week{
-        getData()
         firebase.keepSynced(true)
         data1.forEach {
             if(it.id==getDataOf.value){

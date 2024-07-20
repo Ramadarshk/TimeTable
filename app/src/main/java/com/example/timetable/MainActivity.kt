@@ -1,12 +1,17 @@
 package com.example.timetable
 
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -53,6 +58,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.animation.doOnEnd
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.datastore.dataStore
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.timetable.database.RoomDB
@@ -67,9 +74,15 @@ import kotlinx.coroutines.launch
 val Context.dataStore by dataStore("preferences.Json", PreferencesSerialization)
 
 class MainActivity : ComponentActivity() {
+    private val viewMode by viewModels<StableView>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        installSplashScreen().apply {
+            setKeepOnScreenCondition {
+            !viewMode.isSplashShow.value
+        }
+        }
         setContent {
             TimeTableTheme {
                 OnScreen()
@@ -79,11 +92,11 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun getDataDay(day: String , isAmPm:Boolean ): List<DataSlot> {
-        val view: StableView = viewModel()
         val data = RoomDB.getDataBase(applicationContext)
+        val dataStore1 = dataStore.data.collectAsState(initial = Preferences())
         val slots by data.slotDao().getAll().collectAsState(initial = emptyList())
         val listOfSlot: MutableList<DataSlot> = mutableListOf()
-        val obj= ConvertTheDataOfSlot(view.findTable())
+        val obj= ConvertTheDataOfSlot(dataStore1.value.week)
         val all=obj.dataOfSlotConverter(slots)
         val slotInDay = obj.myListMapsToTime(all,obj.listOfSlotInDay(day = day,1)+obj.listOfSlotInDay(day = day,0),8,20)
         val timeZone= IntRange(8,20).toList()
@@ -224,13 +237,18 @@ fun DateRow(viewModel: StableView = viewModel() , onChangeTime: () -> Unit = {})
                 text = viewModel.day.value.uppercase() ,
                 color = MaterialTheme.colorScheme.primary ,
                 fontWeight = FontWeight.ExtraBold ,
-                fontSize = 25.sp,
-                modifier = Modifier.weight(1f)
+                fontSize = 20.sp,
+                modifier = Modifier.weight(1.5f)
             )
-            TextButton(onClick = { Intent(this@MainActivity , MainActivity2::class.java).also { startActivity(it)} }) {
-                Text(text = viewModel.getDataOf.value, color = MaterialTheme.colorScheme.primary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            TextButton(onClick = { Intent(this@MainActivity , MainActivity2::class.java).also { startActivity(it)} }, modifier = Modifier ){
+                Text(text = when(viewModel.getDataOf.value){
+                    stringResource(id = R.string.please_select_a_day_by_pressing)->{
+                        "SLOT VIEW"
+                    }
+                    else ->{
+                        viewModel.getDataOf.value}}, color = MaterialTheme.colorScheme.primary, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
-            IconButton(onClick = onChangeTime) {
+            IconButton(onClick = onChangeTime,Modifier) {
                 if(viewModel.timeAmPm.value){
                     Icon(imageVector = Icons.Filled.Timer , contentDescription = "AM/PM")}
                 else{

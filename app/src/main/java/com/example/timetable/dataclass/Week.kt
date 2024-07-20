@@ -1,7 +1,9 @@
 package com.example.timetable.dataclass
 
 import com.google.firebase.database.IgnoreExtraProperties
+import kotlinx.serialization.Serializable
 
+@Serializable
 @IgnoreExtraProperties
 data class Week(
     val id: String ,
