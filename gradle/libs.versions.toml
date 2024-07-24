@@ -18,6 +18,8 @@ roomCommon = "2.6.1"
 googleGmsGoogleServices = "4.4.2"
 firebaseDatabase = "21.0.0"
 kotlinSerializationPulgin="1.8.10"
+room = "2.6.1"
+ksp = "1.9.0-1.0.13"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -54,3 +56,4 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 jetbrains-kotlin-plugin-serialization={id="org.jetbrains.kotlin.plugin.serialization",version.ref="kotlinSerializationPulgin"}
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

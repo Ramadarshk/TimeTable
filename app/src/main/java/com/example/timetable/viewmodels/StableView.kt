@@ -17,19 +17,11 @@ import kotlinx.coroutines.launch
 import java.util.Calendar
 
 class StableView:ViewModel() {
-    private val splashShowFlow = MutableStateFlow(true)
-    val isSplashShow = splashShowFlow.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            delay(3000)
-            splashShowFlow.value = false
-        }
-    }
     private val _days=listOf("monday","tuesday","wednesday","thursday","friday","saturday","sunday")
+    private val _days1=listOf("sunday","monday","tuesday","wednesday","thursday","friday","saturday")
     private val calendar: Calendar = Calendar.getInstance()
-    private var dayno = calendar.get(Calendar.DAY_OF_WEEK) - 2
-    val day= mutableStateOf(_days[dayno])
+    private var dayNo = calendar.get(Calendar.DAY_OF_WEEK) - 1
+    val day= mutableStateOf(_days1[dayNo])
     val days = _days
     val timeAmPm= mutableStateOf(true)
     var getDataOf= mutableStateOf("Please Select a Day By Pressing ->")
@@ -39,6 +31,7 @@ class StableView:ViewModel() {
     fun getData(){
         firebase.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
+                Log.d("TAG", "Value is: $snapshot")
                 data = listOf()
                 data1 = listOf()
                 if (snapshot.exists()){
@@ -60,9 +53,11 @@ class StableView:ViewModel() {
         firebase.keepSynced(true)
         data1.forEach {
             if(it.id==getDataOf.value){
+                Log.d("TAG", "findTable: $getDataOf  $it")
                 return it
             }
         }
+
         return Week()
     }
 }

@@ -1,0 +1,70 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "8a49bd7b0bae4040d88457301b6f6615",
+    "entities": [
+      {
+        "tableName": "Slot",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`courseId` TEXT NOT NULL, `courseName` TEXT NOT NULL, `theory` TEXT NOT NULL, `theoryLocation` TEXT NOT NULL, `lab` TEXT NOT NULL, `labLocation` TEXT, `isLab` INTEGER NOT NULL, PRIMARY KEY(`courseId`))",
+        "fields": [
+          {
+            "fieldPath": "courseId",
+            "columnName": "courseId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "courseName",
+            "columnName": "courseName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "theory",
+            "columnName": "theory",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "theoryLocation",
+            "columnName": "theoryLocation",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lab",
+            "columnName": "lab",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "labLocation",
+            "columnName": "labLocation",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "isLab",
+            "columnName": "isLab",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "courseId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8a49bd7b0bae4040d88457301b6f6615')"
+    ]
+  }
+}

@@ -4,6 +4,7 @@ plugins {
     id ("org.jetbrains.kotlin.kapt")
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.jetbrains.kotlin.plugin.serialization)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -25,11 +26,13 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt") ,
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -72,10 +75,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.material.icons.extended)
-//dependencies
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.room.ktx)
-    kapt(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
     implementation (libs.androidx.lifecycle.viewmodel.ktx)
     implementation (libs.androidx.lifecycle.livedata.ktx)
     implementation (libs.androidx.lifecycle.common.java8)

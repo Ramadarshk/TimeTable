@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android) apply false
     alias(libs.plugins.google.gms.google.services) apply false
     alias(libs.plugins.jetbrains.kotlin.plugin.serialization) apply false
-
+    alias(libs.plugins.ksp) apply false
 }
 buildscript{
     dependencies {

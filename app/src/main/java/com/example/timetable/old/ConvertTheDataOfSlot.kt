@@ -140,10 +140,12 @@ class ConvertTheDataOfSlot(semWeek: Week=Week()) {
 
     private fun timeFormat(it: Int , m: String = "00" , b: Boolean): String {
         return if (b) {
-            if (it < 12) {
+            if (it > 12) {
                 "${it%12}:$m PM"
-            } else {
+            } else if (it<12) {
                 "${it%12}:$m AM"
+            }else{
+                "12:$m PM"
             }
         } else {
             "$it:$m"

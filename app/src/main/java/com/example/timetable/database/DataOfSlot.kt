@@ -24,7 +24,7 @@ data class DataOfSlot(
     @ColumnInfo(name = "isLab")
     val isLab: Boolean ,
 )
-class Converter{
+object Converter{
     @TypeConverter
     fun fromString(value: String): List<String> {
         return value.split(",").map { it.trim() }
@@ -33,5 +33,16 @@ class Converter{
     @TypeConverter
     fun toString(list: List<String>): String {
         return list.joinToString(",")
+    }
+    private const val DELIMITER = ","
+
+    @TypeConverter
+    fun fromListToString(value: List<String?>?): String?{
+        return value?.joinToString(DELIMITER) { it ?: "" }
+    }
+
+    @TypeConverter
+    fun fromStringToList(value: String?): List<String?>? {
+        return value?.split(DELIMITER)?.map { if (it.isBlank()) null else it }
     }
 }
