@@ -22,12 +22,10 @@
             android:name=".MainActivity2"
             android:exported="false"
             android:label="@string/title_activity_main2"
-            android:launchMode="singleTop"
             android:theme="@style/Theme.TimeTable" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.TimeTable">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

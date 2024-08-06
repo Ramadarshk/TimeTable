@@ -7,8 +7,12 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,7 +46,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -76,10 +79,11 @@ class MainActivity : ComponentActivity() {
             TimeTableTheme {
                 val dataStore1 = dataStore.data.collectAsState(initial = Preferences())
                 val view: StableView = viewModel()
-                view.getDataOf.value = dataStore1.value.sem
+                val int =this.intent.getStringExtra("sem")
+                view.getDataOf.value =int?: dataStore1.value.sem
                 Log.d("data" , dataStore1.value.sem)
                 view.getData()
-                val week = view.findTable()
+                val week: Week = view.findTable()
                 Log.d("week", week.toString())
                 Log.d("week",dataStore1.value.sem)
                 //Text(text = week.toString())
@@ -89,23 +93,25 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun getDataDay(day: String , view: StableView = viewModel(),week: Week=Week()): List<DataSlot> {
+    fun getDataDay(day: String , view: StableView = viewModel(),week1: Week=Week()): List<DataSlot> {
         val data = RoomDB.getDataBase(applicationContext)
-
         val dataStore1 = dataStore.data.collectAsState(initial = Preferences())
         val slots by data.slotDao().getAll().collectAsState(initial = emptyList())
         view.getDataOf.value = dataStore1.value.sem
         Log.d("data" , dataStore1.value.sem)
-       // view.getData()
-        //val week = view.findTable()
+        if (view.check(week1)){
+             view.getData()
+        }
+        Text(text = view.getDataOf.value, color = MaterialTheme.colorScheme.background, modifier = Modifier.height(2.dp))
+        val week = view.findTable()
         Log.d("week", week.toString())
         //Text(text = week.toString())
         val listOfSlot: MutableList<DataSlot> = mutableListOf()
         val obj= ConvertTheDataOfSlot(week)
         val all=obj.dataOfSlotConverter(slots)
-
+        //Text(text = all.toString())
         val slotInDay = obj.myListMapsToTime(all,obj.listOfSlotInDay(day = day,1)+obj.listOfSlotInDay(day = day,0),8,20)
-       // Text(text = slotInDay.toString())
+       //Text(text = slotInDay.toString())
         val timeZone= IntRange(8,20).toList()
         /*for (x in timeZone){
             println(x)
@@ -133,7 +139,7 @@ class MainActivity : ComponentActivity() {
         return listOfSlot.toList()
     }
 
-//@Preview(showBackground = true)
+@Preview(showBackground = true)
 @Composable
 fun OnScreen(
     viewModel: StableView = viewModel() ,
@@ -162,11 +168,16 @@ fun OnScreen(
             Modifier
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)) {
-            Column(){
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .animateContentSize(
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioLowBouncy ,
+                            stiffness = Spring.StiffnessLow
+                        )
+                    )){
            val dataList = getDataDay(day,viewModel,week)
-            //val dataList = getData(viewModel.day.value,viewModel.timeAmPm.value)
-           // Log.d("data" , dataList.toString())
-
             if (dataList.isEmpty()) {
                 val data0 = DataSlot(
                     title = "NO CLASSES ON THIS ${viewModel.day.value.uppercase()}" ,
@@ -175,12 +186,20 @@ fun OnScreen(
                     slotId = viewModel.day.value + 0 ,
                     lab = false
                 )
-                DailySlotCard(data = data0 , true)
+                DailySlotCard(data = data0 , sizeNil = true)
             } else {
-                LazyColumn {
+                LazyColumn(
+                    Modifier
+                        .fillMaxSize()
+                        .animateContentSize(
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioLowBouncy ,
+                                stiffness = Spring.StiffnessLow
+                            )
+                        )) {
                     items(dataList) {
-                        Spacer(Modifier.height(10.dp))
                         DailySlotCard(data = it)
+                        Spacer(Modifier.height(10.dp))
                     }
                 }
             }
@@ -191,10 +210,10 @@ fun OnScreen(
 
 
 @Composable
-fun DailySlotCard(data: DataSlot , sizeNil: Boolean = false) {
+fun DailySlotCard(modifier: Modifier=Modifier,data: DataSlot , sizeNil: Boolean = false) {
     //val data=DataSlot("hello","10:00am-11:00pm","CB-09","0",false)
     Card(
-        Modifier
+        modifier
             .height(100.dp)
             .padding(horizontal = 15.dp) ,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer) ,
@@ -204,9 +223,11 @@ fun DailySlotCard(data: DataSlot , sizeNil: Boolean = false) {
         Row(
             Modifier
                 .fillMaxHeight()
+                .border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(20.dp))
                 .padding(start = 15.dp , end = 15.dp)
                 .weight(1f)
         ) {
+
             Icon(
                 imageVector = if (data.lab) {
                     Icons.Default.Computer

@@ -57,11 +57,18 @@ class ConvertTheDataOfSlot(semWeek: Week=Week()) {
 
     private fun labFilter(lab: List<String?>): List<String?> {
         val filter = lab.filter {
-            it != null && it != ""
+            it != null && it != "" && it != " "&& it != "null"
         }
-        val inter: List<Int> = filter.map {
-            it?.substring(1)?.toInt() ?: 0
-        }.sorted()
+        println(lab+filter)
+        val inter: List<Int> = try {
+            filter.map {
+                it?.substring(1)?.toInt() ?: 0
+            }.sorted()
+        } catch (e: Exception) {
+            println(lab)
+            e.printStackTrace()
+            listOf()
+        }
         val inter1 = mutableListOf<String?>()
         for (x in inter.indices step 2) {
             inter1 += "L" + inter[x]
@@ -153,7 +160,6 @@ class ConvertTheDataOfSlot(semWeek: Week=Week()) {
     }
 }
     fun main() {
-        val view= StableView()
     val obj=ConvertTheDataOfSlot(/*view.findTable()*/)
     val day="wednesday"
     val slots=listOf(DataOfSlot ("CSE1002","Crypto",listOf("TD2","D2","",""),"CB101",listOf("L37","L38","L2","L3"),"CB202",true))

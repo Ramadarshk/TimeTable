@@ -1,21 +1,16 @@
 package com.example.timetable.viewmodels
 
+
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.timetable.dataclass.Week
 import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import java.util.Calendar
-
 class StableView:ViewModel() {
     private val _days=listOf("monday","tuesday","wednesday","thursday","friday","saturday","sunday")
     private val _days1=listOf("sunday","monday","tuesday","wednesday","thursday","friday","saturday")
@@ -28,16 +23,17 @@ class StableView:ViewModel() {
     val firebase= Firebase.database.getReference("TimeTable")
     var data:List<String> = mutableListOf()
     var data1:List<Week> = mutableListOf()
-    fun getData(){
+     fun getData(){
         firebase.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                Log.d("TAG", "Value is: $snapshot")
+              //  Log.d("dataSem1", "Value is: $snapshot")
                 data = listOf()
                 data1 = listOf()
                 if (snapshot.exists()){
                     for (i in snapshot.children){
                         data += i.key.toString()
                         for (j in i.children){
+                           // Log.d("dataSem2", "onDataChange: $j")
                             data1 += j.getValue(Week::class.java)!!
                         }
                     }
@@ -51,13 +47,21 @@ class StableView:ViewModel() {
     }
     fun findTable():Week{
         firebase.keepSynced(true)
+        getData()
+        //Log.d("dataSem", "findTable: $data1")
         data1.forEach {
             if(it.id==getDataOf.value){
-                Log.d("TAG", "findTable: $getDataOf  $it")
+
                 return it
             }
         }
-
         return Week()
     }
+
+    fun check(week: Week): Boolean {
+       return week.id=="" && week.tuesday.isEmpty() && week.wednesday.isEmpty() && week.thursday.isEmpty() && week.friday.isEmpty() && week.saturday.isEmpty()
+    }
+
+
+
 }

@@ -2,6 +2,7 @@ package com.example.timetable
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -22,9 +23,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBackIosNew
@@ -76,7 +78,6 @@ import com.example.timetable.protodatastore.Preferences
 import com.example.timetable.ui.theme.TimeTableTheme
 import com.example.timetable.viewmodels.AddSlot
 import com.example.timetable.viewmodels.StableView
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class MainActivity2 : ComponentActivity() {
@@ -214,7 +215,7 @@ class MainActivity2 : ComponentActivity() {
                 onLongClick = { onLongClick(edit)
                 if(!edit){
                     edit = true
-                    onClick(edit)
+                    onClick(true)
                 }
             }
                 , onClick = {
@@ -365,7 +366,7 @@ class MainActivity2 : ComponentActivity() {
                     keyboardType = KeyboardType.Text
                 )
                 Box(modifier = Modifier , contentAlignment = Alignment.TopCenter) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.verticalScroll(rememberScrollState())) {
                         OutlinedTextField(value = headText , onValueChange = {
                             headText = it.uppercase()
                         } , label = { Text(text = "Course Name") }, isError = headTextError, // Indicate error state
@@ -510,7 +511,7 @@ class MainActivity2 : ComponentActivity() {
 
 
     @Composable
-    fun Top(deleteAll: () -> Unit = {} , dialogOpen: () -> Unit = {}) {
+    fun Top(onWayBack:() -> Unit,view: StableView,deleteAll: () -> Unit = {} , dialogOpen: () -> Unit = {} ) {
         Row(
             verticalAlignment = Alignment.CenterVertically ,
             horizontalArrangement = Arrangement.SpaceBetween ,
@@ -518,10 +519,23 @@ class MainActivity2 : ComponentActivity() {
                 .fillMaxWidth()
                 .padding(top = 20.dp)
         ) {
+
+           // val dataStore1 = dataStore.data.collectAsState(initial = Preferences())
+
             IconButton(
                 onClick = {
+                    onWayBack.invoke()
+
+                    lifecycleScope.launch {
+                    view.getData()
+                    dataStore.updateData {
+                        it.copy(sem = view.getDataOf.value /*, week = week*/)
+                    }
+                }
+                    Log.d("dataSem" , view.getDataOf.value)
                     val int = Intent(this@MainActivity2 , MainActivity::class.java)
                     int.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    int.putExtra("sem", view.getDataOf.value)
                     startActivity(int)
                 } ,
                 modifier = Modifier
@@ -571,7 +585,7 @@ class MainActivity2 : ComponentActivity() {
     }
 
     @Composable
-    fun MyScreen() {
+    fun MyScreen(view: StableView = viewModel(),onWayBack: () -> Unit = {}) {
         val viewModel: AddSlot = viewModel()
         val data = RoomDB.getDataBase(applicationContext)
         val list by data.slotDao().getAll().collectAsState(initial = emptyList())
@@ -623,7 +637,7 @@ class MainActivity2 : ComponentActivity() {
                    }
                }}
               else{
-               Top(deleteAll = {
+               Top(onWayBack = onWayBack,view,deleteAll = {
                 if (list.isNotEmpty()) {
                     alert = true
                 }
@@ -638,7 +652,7 @@ class MainActivity2 : ComponentActivity() {
         { innerPadding ->
             Box(Modifier.padding(innerPadding)) {
                 Column {
-                    SelectedTable()
+                    SelectedTable(view)
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         items(list) { it1 ->
                             SlotScreen(it1 , onEdit = {
@@ -684,7 +698,8 @@ class MainActivity2 : ComponentActivity() {
                 val k = viewModel.onSaved()
                 if (k != initialState) {
                 lifecycleScope.launch {
-                    data.slotDao().delete(currentSelected)
+                    data.slotDao().deleteByCourseId(currentSelected.courseId)
+
                     data.slotDao().insert(k)
                 }
                 updateOpen=false
@@ -737,14 +752,15 @@ class MainActivity2 : ComponentActivity() {
         }
     }
 
-    fun plus(sessionSlot: List<String?>): String {
-        val kel = emptyList<String?>().toMutableList()
-        sessionSlot.filter {
-            it != null && it != ""
-        }.forEach {
-            kel += it
-        }
-        return kel.joinToString(separator = "+")
+}
+
+fun plus(sessionSlot: List<String?>): String {
+    val kel = emptyList<String?>().toMutableList()
+    sessionSlot.filter {
+        it != null && it != "" && it != " " && it != "null"
+    }.forEach {
+        kel += it
     }
+    return kel.joinToString(separator = "+")
 }
 

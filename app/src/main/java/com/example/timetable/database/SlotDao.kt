@@ -17,6 +17,8 @@ interface SlotDao {
     fun findByCourseId(courseId: String): Flow<DataOfSlot>
     @Delete
     suspend fun delete(slot: DataOfSlot)
+    @Query("DELETE FROM Slot WHERE courseId = :courseId")
+    suspend fun deleteByCourseId(courseId: String)
     @Query("DELETE FROM Slot")
     suspend fun deleteAll()
 
