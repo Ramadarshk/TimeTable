@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -50,8 +51,9 @@ class MainActivity3 : ComponentActivity() {
     @Composable
     fun GreetingPreview() {
         TimeTableTheme {
-            Box(){
+            Column(){
                 MainActivity().DailySlotCard(Modifier.padding(vertical = 10.dp) ,data = DataSlot())
+                MainActivity().But(fnu = { /*TODO*/ } , modifier = Modifier , day = "Monday")
             }
         }
     }

@@ -76,7 +76,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            TimeTableTheme {
+            TimeTableTheme() {
                 val dataStore1 = dataStore.data.collectAsState(initial = Preferences())
                 val view: StableView = viewModel()
                 val int =this.intent.getStringExtra("sem")
@@ -309,14 +309,14 @@ fun But(fnu: () -> Unit , modifier: Modifier , day: String , elev: Dp = 12.dp) {
     TextButton(
         onClick = fnu ,
         modifier = modifier ,
-        colors = ButtonDefaults.textButtonColors(MaterialTheme.colorScheme.primaryContainer) ,
+        colors = ButtonDefaults.textButtonColors(MaterialTheme.colorScheme.primary) ,
         border = BorderStroke(
             2.dp ,
-            MaterialTheme.colorScheme.secondary
+            MaterialTheme.colorScheme.inversePrimary
         ) ,
         elevation = ButtonDefaults.elevatedButtonElevation(elev)
     ) {
-        Text(text = day.uppercase() , color = MaterialTheme.colorScheme.onPrimaryContainer)
+        Text(text = day.uppercase() , color = MaterialTheme.colorScheme.onPrimary)
     }
     Spacer(Modifier.width(10.dp))
 }
