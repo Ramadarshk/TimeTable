@@ -309,14 +309,14 @@ fun But(fnu: () -> Unit , modifier: Modifier , day: String , elev: Dp = 12.dp) {
     TextButton(
         onClick = fnu ,
         modifier = modifier ,
-        colors = ButtonDefaults.textButtonColors(MaterialTheme.colorScheme.primary) ,
+        colors = ButtonDefaults.textButtonColors(MaterialTheme.colorScheme.onPrimary) ,
         border = BorderStroke(
             2.dp ,
-            MaterialTheme.colorScheme.inversePrimary
+            MaterialTheme.colorScheme.secondary
         ) ,
         elevation = ButtonDefaults.elevatedButtonElevation(elev)
     ) {
-        Text(text = day.uppercase() , color = MaterialTheme.colorScheme.onPrimary)
+        Text(text = day.uppercase() , color = MaterialTheme.colorScheme.onPrimaryContainer)
     }
     Spacer(Modifier.width(10.dp))
 }
