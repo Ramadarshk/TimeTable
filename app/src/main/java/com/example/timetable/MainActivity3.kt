@@ -1,7 +1,9 @@
 package com.example.timetable
 
 
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -27,15 +29,23 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.datastore.dataStore
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.timetable.dataclass.DataSlot
+import com.example.timetable.dataclass.Week
+import com.example.timetable.protodatastore.Preferences
+import com.example.timetable.protodatastore.PreferencesSerialization
 import com.example.timetable.ui.theme.TimeTableTheme
+import com.example.timetable.viewmodels.StableView
 import kotlinx.serialization.Serializable
+//val Context.dataStore by dataStore("preferences.Json", PreferencesSerialization)
 class MainActivity3 : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +56,10 @@ class MainActivity3 : ComponentActivity() {
                 val nav = rememberNavController()
                 NavHost(navController = nav, startDestination =Screen1) {
                     composable<Screen1> {
-                        MainActivity().OnScreen()
+                        val dataStore1 = dataStore.data.collectAsState(initial = Preferences())
+
+                        //Text(text = week.toString())
+                        //OnScreen(viewModel = view,week = week)
                     }
                     composable<Screen2> {
                         MainActivity2().MyScreen{
