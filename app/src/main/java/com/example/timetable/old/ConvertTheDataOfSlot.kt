@@ -6,11 +6,13 @@ import com.example.timetable.viewmodels.StableView
 
 
 class ConvertTheDataOfSlot(semWeek: Week=Week()) {
+    private var mon = semWeek.monday//arrayListOf("","","","","","","","","","","","","","","","","","","","","","","")
     private var tut = semWeek.tuesday //arrayListOf("TEE1","A1","B1","C1","D1","","E2","A2","TBB2","C2","TDD2","","","","","","","","SE1","","G2","","","")
     private var wed = semWeek.wednesday//arrayListOf("TG1","D1","F1","E1","B1","","E2","D2","F2","B2","TCC2","","","","","","","","SC1","","","","","")
     private var thu = semWeek.thursday//arrayListOf("TF1","TC1","TD1","TA1","TFF1","","B2","F2","TD2","TA2","TG2","","","","","","","","","","","","","")
     private var fri = semWeek.friday//arrayListOf("TCC1","TB1","TAA1","TE1","F1","","C2","TB2","TAA2","TE2","TF2","","","","G1","","","","","","G2","SD1","","")
     private var sat = semWeek.saturday//arrayListOf("TDD1","C1","A1","TBB1","E1","","D2","TC2","A2","SF1","TEE2","","","","","G1","","","","","","","","")
+    private var monL = semWeek.mondayLab
     private var tutL = semWeek.tuesdayLab//arrayListOf("L1", "L2" ,"L3", "L4" ,"L5" ,"L6" ,"L31","L32","L33","L34","L35","L36")
     private var wedL = semWeek.wednesdayLab//arrayListOf("L7","L8","L9","L10","L11","L12","L37","L38","L39","L40","L41","L42")
     private var thuL = semWeek.thursdayLab//arrayListOf("L13","L14","L15","L16","L17","L18","L43","L44","L45","L46","L47","L48")
@@ -18,6 +20,10 @@ class ConvertTheDataOfSlot(semWeek: Week=Week()) {
     private var satL = semWeek.saturdayLab//arrayListOf("L25","L26","L27","L28","L29","L30","L55","L56","L57","L58","L59","L60")
     fun listOfSlotInDay(day: String , type: Int): List<String> {
         return when(day){
+            "monday"->when(type){
+                1->mon
+                else->monL
+            }
             "tuesday"->when(type){
                 1->tut
                 else->tutL
